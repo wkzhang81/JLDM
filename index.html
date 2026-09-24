@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jev-like · Decision Studio</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230071e3'/%3E%3Ctext x='50' y='68' font-size='52' font-family='-apple-system,sans-serif' font-weight='700' fill='white' text-anchor='middle'%3EO%3C/text%3E%3C/svg%3E">
+<style>
+  /* ========== Design Tokens ========== */
+  :root {
+    --bg: #f5f5f7;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --text-secondary: #6e6e73;
+    --text-tertiary: #86868b;
+    --accent: #0071e3;
+    --accent-hover: #0077ed;
+    --accent-soft: rgba(0, 113, 227, 0.08);
+    --border: #d2d2d7;
+    --border-focus: #0071e3;
+    --success: #34c759;
+    --warning: #ff9f0a;
+    --danger: #ff3b30;
+    --radius: 18px;
+    --radius-sm: 12px;
+    --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+    --shadow-pop: 0 12px 40px rgba(0, 0, 0, 0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+                 "Helvetica Neue", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  /* ========== Navigation ========== */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(245, 245, 247, 0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  .nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .brand-mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #0071e3 0%, #5e5ce6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .brand-sub {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    font-weight: 400;
+    margin-left: 2px;
+  }
+  .nav-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-tertiary);
+    transition: background 0.3s;
+  }
+  .status-dot.live { background: var(--success); box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.15); }
+  .status-dot.error { background: var(--danger); box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.15); }
+  /* ========== Hero ========== */
+  .hero {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 64px 24px 40px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: clamp(40px, 6vw, 64px);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    background: linear-gradient(90deg, #1d1d1f 0%, #1d1d1f 40%, #0071e3 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p {
+    margin-top: 16px;
+    font-size: 19px;
+    color: var(--text-secondary);
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+  }
+  /* Connection segmented control */
+  .seg-control {
+    display: inline-flex;
+    background: #e8e8ed;
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .seg-btn {
+    border: none;
+    background: transparent;
+    padding: 7px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    color: var(--text-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .seg-btn.active {
+    background: #fff;
+    color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .seg-btn:not(.active):hover { color: var(--text); }
+  /* ========== Connection Bar (top, full width) ========== */
+  .connection-bar {
+    max-width: 1200px;
+    margin: 0 auto 24px;
+    padding: 0 24px;
+  }
+  .connection-bar .card { padding: 22px 28px; }
+  .connection-bar .field { margin-bottom: 0; }
+  .connection-bar .hint { margin-top: 4px; }
+  /* ========== Layout ========== */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+  }
+  .form-column { display: flex; }
+  .form-column .card { flex: 1; height: 100%; display: flex; flex-direction: column; }
+  .results-column { grid-column: 1 / -1; }
+  @media (max-width: 900px) {
+    .container { grid-template-columns: 1fr; }
+  }
+  /* ========== Cards ========== */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    padding: 28px;
+  }
+  .card + .card { margin-top: 20px; }
+  .section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::before {
+    content: "";
+    width: 16px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  /* ========== Form Elements ========== */
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+  .field input,
+  .field textarea {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--text);
+    background: #f5f5f7;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    outline: none;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+  .field input:focus,
+  .field textarea:focus {
+    background: #fff;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.12);
+  }
+  .field textarea {
+    resize: vertical;
+    min-height: 88px;
+    line-height: 1.5;
+  }
+  .field .hint {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 5px;
+  }
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  /* Context card: let the background field absorb unused vertical space */
+  .form-column:first-child .card .field:first-of-type {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .form-column:first-child .card .field:first-of-type #reference {
+    flex: 1;
+    min-height: 150px;
+  }
+
+  /* ===IMAGE MOD START=== */
+  .image-preview-wrap {
+    margin-top: 10px;
+  }
+  .image-preview-item {
+    position: relative;
+    display: inline-block;
+    margin-right:10px;
+    margin-bottom:10px;
+  }
+  .image-preview-item img {
+    width: 120px;
+    height: auto;
+    border-radius: var(--radius-sm);
+    border:1px solid var(--border);
+  }
+  .img-remove-btn {
+    position:absolute;
+    top:-6px;
+    right:-6px;
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    background:var(--danger);
+    color:#fff;
+    border:none;
+    cursor:pointer;
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .dropzone {
+    margin-top: 10px;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 26px 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    background: #fff;
+  }
+  .dropzone:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .dropzone.dragover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.12);
+  }
+  .dropzone .dz-icon {
+    width: 36px;
+    height: 36px;
+    margin: 0 auto 8px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+  }
+  .dropzone .dz-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  .dropzone .dz-text .dz-browse {
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .dropzone .hint {
+    margin-top: 6px;
+  }
+  /* ===IMAGE MOD END=== */
+
+  /* ========== Options List ========== */
+  .options-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .options-count {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .option-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    animation: slideIn 0.25s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .option-badge {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .option-row input {
+    flex: 1;
+    padding: 9px 12px;
+    font-size: 14px;
+    background: #f5f5f7;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    outline: none;
+    transition: all 0.2s;
+  }
+  .option-row input:focus {
+    background: #fff;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.12);
+  }
+  .btn-icon {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+    font-size: 16px;
+    line-height: 1;
+  }
+  .btn-icon:hover {
+    background: rgba(255, 59, 48, 0.1);
+    color: var(--danger);
+  }
+  .btn-icon:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  .btn-add {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 1.5px dashed var(--border);
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn-add:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  /* ========== Buttons ========== */
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 980px;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, opacity 0.2s;
+    margin-top: 20px;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-primary:active { transform: scale(0.985); }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn-secondary {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    color: var(--accent);
+    border: none;
+    border-radius: 980px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.2s;
+  }
+  .btn-secondary:hover { background: var(--accent-soft); }
+  /* ========== Results Panel ========== */
+  .results-empty {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-tertiary);
+  }
+  .results-empty .icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 20px;
+    border-radius: 16px;
+    background: var(--accent-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .results-empty h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .results-empty p { font-size: 14px; max-width: 320px; margin: 0 auto; }
+  /* Loading */
+  .loading-state {
+    text-align: center;
+    padding: 80px 20px;
+  }
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--accent-soft);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-state p { color: var(--text-secondary); font-size: 15px; }
+  /* Winner banner */
+  .winner-banner {
+    border-radius: var(--radius-sm);
+    padding: 20px 22px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    animation: fadeUp 0.4s ease;
+  }
+  .winner-banner.selected {
+    background: linear-gradient(135deg, rgba(0, 113, 227, 0.1) 0%, rgba(94, 92, 230, 0.08) 100%);
+    border: 1px solid rgba(0, 113, 227, 0.18);
+  }
+  .winner-banner.abstain {
+    background: rgba(255, 159, 10, 0.08);
+    border: 1px solid rgba(255, 159, 10, 0.25);
+  }
+  .winner-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 20px;
+  }
+  .winner-banner.selected .winner-icon {
+    background: var(--accent);
+    color: white;
+  }
+  .winner-banner.abstain .winner-icon {
+    background: var(--warning);
+    color: white;
+  }
+  .winner-text .label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .winner-text .value {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .confidence-big {
+    text-align: right;
+    margin-left: auto;
+  }
+  .confidence-big .num {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .confidence-big .cap {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  /* Probability bars */
+  .prob-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+  }
+  .prob-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 28px;
+  }
+  @media (max-width: 700px) {
+    .prob-grid { grid-template-columns: 1fr; }
+  }
+  .prob-item {
+    margin-bottom: 14px;
+    animation: fadeUp 0.4s ease backwards;
+  }
+  .prob-item:nth-child(2) { animation-delay: 0.08s; }
+  .prob-item:nth-child(3) { animation-delay: 0.16s; }
+  .prob-item:nth-child(4) { animation-delay: 0.24s; }
+  .prob-item:nth-child(5) { animation-delay: 0.32s; }
+  .prob-item:nth-child(6) { animation-delay: 0.4s; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .prob-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .prob-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .prob-name .check {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .prob-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .prob-track {
+    height: 8px;
+    background: #e8e8ed;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .prob-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #0071e3, #5e5ce6);
+    width: 0;
+    transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .prob-item.runner-up .prob-fill {
+    background: #c7c7cc;
+  }
+  .prob-item.runner-up .prob-name { color: var(--text-secondary); }
+  /* Decision latency timer */
+  .winner-timer {
+    margin-left: 8px;
+    min-width: 118px;
+    padding-left: 18px;
+    border-left: 1px solid rgba(0, 0, 0, 0.08);
+    text-align: right;
+  }
+  .winner-timer .num {
+    font-size: 24px;
+    font-weight: 650;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .winner-timer .cap {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  @media (max-width: 640px) {
+    .winner-banner { flex-wrap: wrap; }
+    .winner-timer { margin-left: auto; }
+  }
+  /* Error state */
+  .error-banner {
+    background: rgba(255, 59, 48, 0.08);
+    border: 1px solid rgba(255, 59, 48, 0.2);
+    border-radius: var(--radius-sm);
+    padding: 16px 18px;
+    color: #b3261e;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .error-banner strong { display: block; margin-bottom: 4px; }
+  /* Debug panel */
+  .debug-panel {
+    margin-top: 18px;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+  }
+  .debug-panel summary {
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    user-select: none;
+  }
+  .debug-panel pre {
+    margin-top: 10px;
+    padding: 14px;
+    background: #1d1d1f;
+    color: #e8e8ed;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    overflow-x: auto;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 30px 24px 50px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+  /* Mobile: prevent iOS auto-zoom on input focus */
+  @media (max-width: 640px) {
+    .field input,
+    .field textarea,
+    .option-row input { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+<!-- ===== Navigation ===== -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <div class="brand-mark">O</div>
+      Jev-like <span class="brand-sub">Decision Studio</span>
+    </div>
+    <div class="nav-status">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">未连接</span>
+    </div>
+  </div>
+</nav>
+<!-- ===== Hero ===== -->
+<section class="hero">
+  <h1>Typed decisions,<br>beautifully visualized.</h1>
+  <p>把 Jev-like 的 <code style="font-family: ui-monospace, monospace; background:#e8e8ed; padding:2px 6px; border-radius:6px; font-size:15px;">Choice&lt;T&gt;</code> 概率决策跑起来——输入上下文与候选选项，实时看校准后的后验分布。</p>
+</section>
+<!-- ===== Connection (top bar) ===== -->
+<section class="connection-bar">
+  <div class="card">
+    <div class="section-label">连接</div>
+    <div class="seg-control" id="deploySeg">
+      <button class="seg-btn active" data-mode="local">本地 Local</button>
+      <button class="seg-btn" data-mode="cloud">云端 Cloud</button>
+    </div>
+    <div class="row-2" style="margin-top:16px;">
+      <div class="field">
+        <label for="apiUrl">API 接口地址（OpenAI 兼容）</label>
+        <input type="text" id="apiUrl" value="http://localhost:5001/v1" placeholder="http://localhost:5001/v1">
+        <div class="hint">请求将发往 {base}/chat/completions</div>
+      </div>
+      <div class="field">
+        <label for="model">调用模型</label>
+        <input type="text" id="model" value="koboldcpp/Qwen3.8-27B-GSQ-RCO-IQ3_XXS-Uncensored-MTP" placeholder="模型名称">
+      </div>
+    </div>
+    <div class="row-2" style="margin-top:14px;">
+      <div class="field">
+        <label for="apiKey">API Key</label>
+        <input type="password" id="apiKey" value="" placeholder="本地模型可留空">
+      </div>
+      <div class="field">
+        <label for="tempScale">温度缩放</label>
+        <input type="number" id="tempScale" value="1.5" step="0.05" min="0.1" max="5">
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ===== Main: context | options, then results ===== -->
+<main class="container">
+  <!-- Left: Input - Context -->
+  <div class="form-column">
+    <div class="card">
+      <div class="section-label">决策上下文</div>
+      <div class="field">
+        <label for="reference">背景 / Reference</label>
+        <textarea id="reference" placeholder="描述待决策的状态、背景信息或上下文素材…"></textarea>
+      </div>
+      <!-- ===IMAGE MOD HTML=== -->
+      <div class="field">
+        <label>输入图片（KoboldCpp多模态）</label>
+        <div id="imageDropzone" class="dropzone">
+          <div class="dz-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+          </div>
+          <div class="dz-text">拖拽图片到此处，或 <span class="dz-browse">点击选择文件</span></div>
+          <div class="hint">支持多选；Local 模式转为 base64 传给 KoboldCpp images 字段，云端走 OpenAI image_url 格式</div>
+          <input type="file" id="imageFileInput" accept="image/*" multiple hidden />
+        </div>
+        <div id="imagePreviewContainer" class="image-preview-wrap"></div>
+      </div>
+
+      <div class="field">
+        <label for="question">问题 / 评估准则</label>
+        <textarea id="question" placeholder="例如：将以下工单分类到正确的处理部门。"></textarea>
+      </div>
+    </div>
+  </div>
+  <!-- Right: Input - Options + Run -->
+  <div class="form-column">
+    <div class="card">
+      <div class="section-label">候选选项</div>
+      <div class="options-header">
+        <span class="options-count" id="optionsCount">共 0 项</span>
+      </div>
+      <div id="optionsList"></div>
+      <button class="btn-add" id="addOptionBtn">+ 添加选项</button>
+      <button class="btn-primary" id="runBtn">运行决策</button>
+      <button class="btn-secondary" id="simulateBtn">演示数据（无需后端）</button>
+    </div>
+  </div>
+  <!-- Bottom: Output (full width) -->
+  <div class="results-column">
+    <div class="card" id="resultsCard">
+      <div class="results-empty" id="emptyState">
+        <div class="icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0071e3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18" /><path d="M7 15l4-4 4 4 5-5" />
+          </svg>
+        </div>
+        <h3>等待决策</h3>
+        <p>填写背景与问题、添加候选选项，然后点击「运行决策」，概率结果将展示在这里。</p>
+      </div>
+      <div class="loading-state" id="loadingState" style="display:none;">
+        <div class="spinner"></div>
+        <p>正在调用模型计算后验概率…</p>
+      </div>
+      <div id="resultsContent" style="display:none;"></div>
+    </div>
+  </div>
+</main>
+<footer>
+  Jev-like Decision Studio · Choice&lt;T&gt; probabilistic decision via KoboldCpp logprobs
+</footer>
+<script>
+(function () {
+  'use strict';
+  // ============ State ============
+  var state = {
+    options: ['账单计费', '技术支持', '安全事件', '人工审核'],
+    // ===IMAGE MOD STATE===
+    imagesBase64: [] //存储base64图片数组
+  };
+  // ============ DOM ============
+  var $ = function (id) { return document.getElementById(id); };
+  var optionsList = $('optionsList');
+  var optionsCount = $('optionsCount');
+  var addOptionBtn = $('addOptionBtn');
+  var runBtn = $('runBtn');
+  var simulateBtn = $('simulateBtn');
+  var emptyState = $('emptyState');
+  var loadingState = $('loadingState');
+  var resultsContent = $('resultsContent');
+  var resultsCard = $('resultsCard');
+  var statusDot = $('statusDot');
+  var statusText = $('statusText');
+  var decisionStartedAt = null;
+  var decisionElapsedMs = null;
+
+  // ===IMAGE MOD JS===
+  const imageFileInput = $('imageFileInput');
+  const imagePreviewContainer = $('imagePreviewContainer');
+
+  function renderImagePreview(){
+    imagePreviewContainer.innerHTML = '';
+    state.imagesBase64.forEach((b64, idx)=>{
+      const wrap = document.createElement('div');
+      wrap.className = 'image-preview-item';
+      const img = document.createElement('img');
+      img.src = b64;
+      const rmBtn = document.createElement('button');
+      rmBtn.className = 'img-remove-btn';
+      rmBtn.textContent = '×';
+      rmBtn.onclick = ()=>{
+        state.imagesBase64.splice(idx,1);
+        renderImagePreview();
+      };
+      wrap.appendChild(img);
+      wrap.appendChild(rmBtn);
+      imagePreviewContainer.appendChild(wrap);
+    })
+  }
+
+  async function processImageFiles(fileList){
+    const files = Array.from(fileList || []).filter(f => f && f.type && f.type.startsWith('image/'));
+    for(let f of files){
+      const reader = new FileReader();
+      await new Promise(resolve=>{
+        reader.onload = function(ev){
+          state.imagesBase64.push(ev.target.result);
+          resolve();
+        }
+        reader.readAsDataURL(f);
+      })
+    }
+    if(files.length) renderImagePreview();
+  }
+
+  imageFileInput.addEventListener('change', function(){
+    processImageFiles(this.files);
+    imageFileInput.value = '';
+  })
+
+  // === Drag & Drop ===
+  const dropzone = $('imageDropzone');
+  dropzone.addEventListener('click', ()=> imageFileInput.click());
+  ['dragenter', 'dragover'].forEach(evt=>{
+    dropzone.addEventListener(evt, e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.add('dragover');
+    });
+  });
+  ['dragleave', 'drop'].forEach(evt=>{
+    dropzone.addEventListener(evt, e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove('dragover');
+    });
+  });
+  dropzone.addEventListener('drop', e=>{
+    const dt = e.dataTransfer;
+    if(dt && dt.files) processImageFiles(dt.files);
+  });
+  // 阻止浏览器把拖进来的文件直接打开
+  ['dragover', 'drop'].forEach(evt=>{
+    window.addEventListener(evt, e=> e.preventDefault());
+  });
+
+  // ============ Options rendering ============
+  function renderOptions() {
+    optionsList.innerHTML = '';
+    state.options.forEach(function (opt, i) {
+      var row = document.createElement('div');
+      row.className = 'option-row';
+      var badge = document.createElement('div');
+      badge.className = 'option-badge';
+      badge.textContent = String.fromCharCode(65 + i);
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.value = opt;
+      input.placeholder = '选项 ' + (i + 1);
+      input.addEventListener('input', function () {
+        state.options[i] = input.value;
+      });
+      var del = document.createElement('button');
+      del.className = 'btn-icon';
+      del.innerHTML = '&times;';
+      del.title = '删除此选项';
+      del.disabled = state.options.length <= 2;
+      del.addEventListener('click', function () {
+        state.options.splice(i, 1);
+        renderOptions();
+      });
+      row.appendChild(badge);
+      row.appendChild(input);
+      row.appendChild(del);
+      optionsList.appendChild(row);
+    });
+    optionsCount.textContent = '共 ' + state.options.length + ' 项';
+  }
+  addOptionBtn.addEventListener('click', function () {
+    state.options.push('');
+    renderOptions();
+    var inputs = optionsList.querySelectorAll('input');
+    if (inputs.length) inputs[inputs.length - 1].focus();
+  });
+  // ============ Results rendering ============
+  function showLoading() {
+    emptyState.style.display = 'none';
+    resultsContent.style.display = 'none';
+    loadingState.style.display = 'block';
+  }
+  function hideLoading() {
+    loadingState.style.display = 'none';
+  }
+  function setStatus(type, text) {
+    statusDot.className = 'status-dot' + (type ? ' ' + type : '');
+    statusText.textContent = text;
+  }
+  function renderResults(data) {
+    hideLoading();
+    resultsContent.style.display = 'block';
+    emptyState.style.display = 'none';
+    var isAbstain = !!data.abstained;
+    var winner = data.value;
+    var probs = data.probabilities || {};
+    var confidence = data.confidence;
+    // Sort entries by probability desc
+    var entries = Object.keys(probs).map(function (k) {
+      return { name: k, p: probs[k] };
+    }).sort(function (a, b) { return b.p - a.p; });
+    var html = '';
+    // Winner banner
+    html += '<div class="winner-banner ' + (isAbstain ? 'abstain' : 'selected') + '">';
+    html += '<div class="winner-icon">' + (isAbstain
+      ? '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4" /><path d="M12 17h.01" /><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" /></svg>'
+      : '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>') + '</div>';
+    html += '<div class="winner-text">';
+    html += '<div class="label">' + (isAbstain ? '模型选择弃权' : '最终选择') + '</div>';
+    html += '<div class="value">' + escapeHtml(winner) + '</div>';
+    html += '</div>';
+    html += '<div class="confidence-big">';
+    html += '<div class="num">' + (confidence != null ? (confidence * 100).toFixed(1) + '%' : '—') + '</div>';
+    html += '<div class="cap">Confidence</div>';
+    html += '</div>';
+    html += '<div class="winner-timer">';
+    html += '<div class="num">' + formatElapsed(decisionElapsedMs) + '</div>';
+    html += '<div class="cap">耗时</div>';
+    html += '</div>';
+    html += '</div>';
+    // Probability bars
+    html += '<div class="prob-title">后验概率分布</div>';
+    html += '<div class="prob-grid">';
+    entries.forEach(function (e, idx) {
+      var isWinner = !isAbstain && e.name === winner;
+      var pct = Math.round(e.p * 1000) / 10;
+      var cls = isWinner ? '' : 'runner-up';
+      html += '<div class="prob-item ' + cls + '">';
+      html += '<div class="prob-head">';
+      html += '<div class="prob-name">' + (isWinner ? '<span class="check">' +
+        '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>' +
+        '</span>' : '') + escapeHtml(e.name) + '</div>';
+      html += '<div class="prob-value">' + pct.toFixed(1) + '%</div>';
+      html += '</div>';
+      html += '<div class="prob-track"><div class="prob-fill" data-width="' + (pct) + '"></div></div>';
+      html += '</div>';
+    });
+    html += '</div>';
+    resultsContent.innerHTML = html;
+    // Animate bars after render
+    requestAnimationFrame(function () {
+      var fills = resultsContent.querySelectorAll('.prob-fill');
+      fills.forEach(function (f) {
+        f.style.width = f.getAttribute('data-width') + '%';
+      });
+    });
+  }
+  function renderError(message) {
+    stopDecisionTimer();
+    hideLoading();
+    emptyState.style.display = 'none';
+    resultsContent.style.display = 'block';
+    resultsContent.innerHTML =
+      '<div class="error-banner"><strong>调用失败</strong>' +
+      escapeHtml(message) +
+      '<div style="margin-top:8px;font-size:13px;color:#6e6e73;">请确认后端服务已启动，且允许浏览器跨域访问（CORS）。</div></div>';
+    setStatus('error', '连接失败');
+  }
+  function renderDebug(rawDebug, letters) {
+    var existing = resultsContent.querySelector('.debug-panel');
+    if (existing) existing.remove();
+    var dbg = document.createElement('details');
+    dbg.className = 'debug-panel';
+    dbg.innerHTML =
+      '<summary>调试：原始 top_logprobs（期望匹配字母 ' + letters.join(', ') + '）</summary>' +
+      '<pre>' + escapeHtml(rawDebug) + '</pre>';
+    resultsContent.appendChild(dbg);
+  }
+  function formatElapsed(ms) {
+    if (ms == null || !isFinite(ms)) return '—';
+    if (ms < 1000) return Math.round(ms) + ' ms';
+    return (ms / 1000).toFixed(ms < 10000 ? 2 : 1) + ' s';
+  }
+  function startDecisionTimer() {
+    decisionStartedAt = performance.now();
+    decisionElapsedMs = null;
+  }
+  function stopDecisionTimer() {
+    if (decisionStartedAt != null) {
+      decisionElapsedMs = performance.now() - decisionStartedAt;
+      decisionStartedAt = null;
+    }
+  }
+  function escapeHtml(s) {
+    var div = document.createElement('div');
+    div.textContent = String(s == null ? '' : s);
+    return div.innerHTML;
+  }
+  // ============ API call (OpenAI-compatible) ============
+  function buildPrompt(options) {
+    var reference = $('reference').value.trim();
+    var question = $('question').value.trim();
+    var stateObj = {};
+    if (reference) stateObj.reference = reference;
+    if (question) stateObj.question = question;
+    var letters = options.map(function (_, i) { return String.fromCharCode(65 + i); });
+    var optionLines = options.map(function (opt, i) { return letters[i] + '. ' + opt; }).join('\n');
+    return (
+      'Given the following state:\n' + JSON.stringify(stateObj, null, 2) + '\n\n' +
+      'Evaluation criteria:\n' + question + '\n\n' +
+      'Select the single best option from the list below:\n' + optionLines + '\n\n' +
+      'Reply with ONLY the option letter (e.g. A, B, C):'
+    );
+  }
+  function softmax(logits, temperature) {
+    var keys = Object.keys(logits);
+    var maxL = Math.max.apply(null, keys.map(function (k) { return logits[k]; }));
+    var exps = {};
+    var sum = 0;
+    keys.forEach(function (k) {
+      var e = Math.exp((logits[k] - maxL) / temperature);
+      exps[k] = e;
+      sum += e;
+    });
+    var probs = {};
+    keys.forEach(function (k) { probs[k] = exps[k] / sum; });
+    return probs;
+  }
+  function runDecision() {
+    var options = state.options.map(function (o) { return o.trim(); }).filter(Boolean);
+    if (!options.length) {
+      renderError('请至少填写一个候选选项。');
+      return;
+    }
+    var model = $('model').value.trim();
+    if (!model) {
+      renderError('请填写调用模型名称。');
+      return;
+    }
+    // Only score the user-provided options. No UNKNOWN/abstention class is added.
+    var letters = options.map(function (_, i) { return String.fromCharCode(65 + i); });
+    var optionMap = {};
+    letters.forEach(function (l, i) { optionMap[l] = options[i]; });
+    var base = $('apiUrl').value.replace(/\/+$/, '');
+    var temperature = parseFloat($('tempScale').value) || 1.50;
+    startDecisionTimer();
+    showLoading();
+    setStatus('', '请求中…');
+    var prompt = buildPrompt(options);
+    var headers = { 'Content-Type': 'application/json' };
+    var apiKey = $('apiKey').value.trim();
+    if (apiKey) headers['Authorization'] = 'Bearer ' + apiKey;
+    // Determine mode: local = koboldcpp, cloud uses /chat/completions
+    var modeBtn = document.querySelector('#deploySeg .seg-btn.active');
+    var mode = modeBtn ? modeBtn.getAttribute('data-mode') : 'local';
+    if (mode === 'cloud') {
+      // ========== 云端模式保持原有逻辑不变 ==========
+      var endpoint = base + '/chat/completions';
+      // ===IMAGE MOD Cloud OpenAI Vision format===
+      let userContent;
+      if(state.imagesBase64.length>0){
+        userContent = [
+          {type:"text", text: prompt}
+        ];
+        state.imagesBase64.forEach(b64=>{
+          userContent.push({
+            type:"image_url",
+            image_url:{url:b64}
+          })
+        })
+      }else{
+        userContent = prompt;
+      }
+      var body = {
+        model: model,
+        messages: [
+          { role: 'system', content: 'You are a precise decision engine. Reply with ONLY the single option letter, nothing else.' },
+          { role: 'user', content: userContent }
+        ],
+        max_tokens: 512,
+        temperature: 0,
+        logprobs: true,
+        top_logprobs: 20
+      };
+      fetch(endpoint, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body)
+      })
+        .then(function (resp) {
+          if (!resp.ok) throw new Error('HTTP ' + resp.status + ' ' + resp.statusText);
+          return resp.json();
+        })
+        .then(function (data) {
+          processLogprobResult(data, null);
+        })
+        .catch(function (err) {
+          renderError(err.message || String(err));
+        });
+    } else {
+      // ========== LOCAL 模式 KOBOLDCPP 1.121 / JEV Grammar 模式 ==========
+      // KoboldCpp 的 logprobs 是“采样器处理后的 top picks”。如果 temperature=0 / top_k=1，
+      // 很容易只剩实际选中的一个 token，表现为 C:0 => 100%。
+      // 因此这里改用 Kobold 原生 /api/v1/generate，并用 GBNF grammar 把词表严格限制为 A/B/C/...。
+      // 同时关闭会截断候选的 sampler，再通过 /api/extra/last_logprobs 读取该唯一答题位的最多 5 个候选。
+      if (letters.length > 5) {
+        renderError('Local JEV Grammar 模式当前最多支持 5 个用户提供的候选，因为 KoboldCpp 1.121 的 logprobs 最多返回 5 个 top picks。');
+        setStatus('error', '候选过多');
+        return;
+      }
+      var origin;
+      try { origin = new URL(base).origin; }
+      catch (_) { origin = base.replace(/\/v1\/?$/, ''); }
+      var generateUrl = origin + '/api/v1/generate';
+      var lastLogprobUrl = origin + '/api/extra/last_logprobs';
+      var allowed = letters.join('');
+      var grammar = 'root ::= [' + allowed + ']';
+      var localPrompt = prompt + '\nDo not think or explain. Output exactly one letter from ' + letters.join('/') + '.\nAnswer:';
+      var bodyLocal = {
+        prompt: localPrompt,
+        max_length: 1,
+        temperature: 1.0,
+        top_k: 0,
+        top_p: 1.0,
+        min_p: 0.0,
+        typical: 1.0,
+        tfs: 1.0,
+        top_a: 0.0,
+        rep_pen: 1.0,
+        grammar: grammar,
+        grammar_retain_state: false,
+        logprobs: true,
+        stream: false,
+        // ===IMAGE MOD KoboldCpp generate images param===
+        images: state.imagesBase64.length>0 ? state.imagesBase64 : undefined
+      };
+      fetch(generateUrl, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(bodyLocal)
+      })
+        .then(function (resp) {
+          if (!resp.ok) throw new Error('/api/v1/generate HTTP ' + resp.status + ' ' + resp.statusText);
+          return resp.json();
+        })
+        .then(function (genResp) {
+          var generatedText = genResp && genResp.results && genResp.results[0] ? String(genResp.results[0].text || '') : '';
+          return fetch(lastLogprobUrl, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({})
+          }).then(function (r) {
+            if (!r.ok) throw new Error('/api/extra/last_logprobs HTTP ' + r.status);
+            return r.json();
+          }).then(function (lpExtraData) {
+            var lp = lpExtraData && lpExtraData.logprobs;
+            if (!lp || (!Array.isArray(lp.content) && !Array.isArray(lp.top_logprobs))) {
+              throw new Error('KoboldCpp 没有返回 last_logprobs。原始返回：' + JSON.stringify(lpExtraData).slice(0, 1000));
+            }
+            // 转成 processLogprobResult 已支持的 OpenAI-like 结构。
+            var synthetic = {
+              choices: [{
+                text: generatedText,
+                logprobs: lp
+              }],
+              _localJevMeta: {
+                mode: 'grammar',
+                grammar: grammar,
+                request: bodyLocal,
+                rawGenerate: genResp
+              }
+            };
+            return processLogprobResult(synthetic, lpExtraData);
+          });
+        })
+        .catch(function (err) {
+          renderError(err.message || String(err));
+          setStatus('error', 'Local JEV 请求失败');
+        });
+    }
+    // 抽离公共解析逻辑，云端和本地koboldcpp共用
+    function processLogprobResult(data, koboldRawExtra) {
+      var choice = (data.choices || [])[0] || {};
+      var lp = choice.logprobs || {};
+      var positions = [];
+      // KoboldCpp 1.121 的 /v1/completions 会在 logprobs.content 中同时返回：
+      // 实际生成 token（step.token）以及该位置 top_logprobs。优先使用它，避免重复拼接 legacy top_logprobs。
+      if (Array.isArray(lp.content) && lp.content.length) {
+        lp.content.forEach(function (step, idx) {
+          var flat = {};
+          if (step && Array.isArray(step.top_logprobs)) {
+            step.top_logprobs.forEach(function (item) {
+              if (item && item.token != null && item.logprob != null) flat[String(item.token)] = Number(item.logprob);
+            });
+          }
+          // 某些位置 top_logprobs 只返回实际 token；确保实际 token 本身也被保留。
+          if (step && step.token != null && step.logprob != null && flat[String(step.token)] == null) {
+            flat[String(step.token)] = Number(step.logprob);
+          }
+          positions.push({ idx: idx, selected: step && step.token != null ? String(step.token) : null, top: flat });
+        });
+      } else if (Array.isArray(lp.top_logprobs)) {
+        lp.top_logprobs.forEach(function (posTokens, idx) {
+          var flat = {};
+          if (posTokens && typeof posTokens === 'object') {
+            Object.keys(posTokens).forEach(function (k) { flat[k] = Number(posTokens[k]); });
+          }
+          var selected = Array.isArray(lp.tokens) && lp.tokens[idx] != null ? String(lp.tokens[idx]) : null;
+          positions.push({ idx: idx, selected: selected, top: flat });
+        });
+      }
+      if (!positions.length) {
+        var debugMsg = koboldRawExtra ? JSON.stringify(koboldRawExtra, null, 2) : JSON.stringify(data).slice(0, 1200);
+        throw new Error('响应中未包含可解析的 logprobs。原始返回：' + debugMsg.slice(0, 1200));
+      }
+      function normTok(t) { return String(t == null ? '' : t).trim().toUpperCase(); }
+      function logAddExp(a, b) {
+        if (a == null) return b;
+        if (b == null) return a;
+        var m = Math.max(a, b);
+        return m + Math.log(Math.exp(a - m) + Math.exp(b - m));
+      }
+      var msgContent = (choice.message && choice.message.content) ? choice.message.content : (choice.text || '');
+      var rawDebug = '模型输出内容: ' + JSON.stringify(String(msgContent)) + '\n\n' +
+        '已上传图片数量:'+state.imagesBase64.length+'\n'+
+        positions.map(function (p) {
+          return '#' + p.idx + ' selected=' + JSON.stringify(p.selected) + ' top=' + JSON.stringify(p.top);
+        }).join('\n');
+      // 精确定位：只接受“模型实际生成 token 本身就是候选字母”的位置。
+      // 这会彻底排除  位置里偶然出现的 C/A 等 top 候选。
+      var answerPos = null;
+      for (var pi = 0; pi < positions.length; pi++) {
+        if (letters.indexOf(normTok(positions[pi].selected)) !== -1) {
+          answerPos = positions[pi];
+          break;
+        }
+      }
+      // legacy 响应若没有 selected token，则从最终文本提取答案字母，并只在包含该字母的最后位置回退匹配。
+      var usedFallback = false;
+      if (!answerPos) {
+        var trimmed = String(msgContent).trim().toUpperCase();
+        var finalLetter = null;
+        for (var li = 0; li < letters.length; li++) {
+          if (trimmed === letters[li] || trimmed.endsWith('\n' + letters[li]) || trimmed.endsWith(' ' + letters[li])) {
+            finalLetter = letters[li]; break;
+          }
+        }
+        if (finalLetter) {
+          for (var rpi = positions.length - 1; rpi >= 0; rpi--) {
+            var ks = Object.keys(positions[rpi].top);
+            if (ks.some(function (k) { return normTok(k) === finalLetter; })) {
+              answerPos = positions[rpi]; usedFallback = true; break;
+            }
+          }
+        }
+      }
+      if (!answerPos) {
+        renderError('模型没有直接生成候选字母。Local JEV 模式已关闭 reasoning，但当前模型仍未按 A/B/C… 格式作答。请查看调试信息。');
+        renderDebug(rawDebug, letters);
+        setStatus('error', '未生成答案字母');
+        return;
+      }
+      // 同一个字母可能有多个 token 表示（如 "C" / " C" / "\nC"）。
+      // 将所有 trim 后等于该字母的 token 概率相加（log-space logsumexp），而不是覆盖。
+      var letterLogprobs = {};
+      Object.keys(answerPos.top).forEach(function (tok) {
+        var n = normTok(tok);
+        if (letters.indexOf(n) !== -1) {
+          var v = answerPos.top[tok];
+          if (isFinite(v)) letterLogprobs[n] = logAddExp(letterLogprobs[n], v);
+        }
+      });
+      var extracted = {};
+      var missingOptions = [];
+      letters.forEach(function (letter) {
+        var optionName = optionMap[letter];
+        if (letterLogprobs[letter] != null && isFinite(letterLogprobs[letter])) extracted[optionName] = letterLogprobs[letter];
+        else missingOptions.push(optionName);
+      });
+      if (!Object.keys(extracted).length) {
+        renderError('已定位到实际答案 token，但该位置没有候选字母 logprob。');
+        renderDebug(rawDebug, letters);
+        setStatus('error', '概率解析失败');
+        return;
+      }
+      var probsObserved = softmax(extracted, temperature);
+      var probs = {};
+      options.forEach(function (opt) { probs[opt] = probsObserved[opt] != null ? probsObserved[opt] : 0; });
+      var best = null, bestP = -1;
+      Object.keys(probsObserved).forEach(function (opt) {
+        if (probsObserved[opt] > bestP) { bestP = probsObserved[opt]; best = opt; }
+      });
+      // Forced-choice mode: winner must be one of the user-provided options.
+      stopDecisionTimer();
+      renderResults({ value: best, probabilities: probs, confidence: bestP, abstained: false });
+      var isGrammarMode = data._localJevMeta && data._localJevMeta.mode === 'grammar';
+      var truncationNote = missingOptions.length
+        ? '\n\n⚠ ' + (isGrammarMode ? 'Grammar 已限制为 ' + letters.join('/') + '，但 KoboldCpp 仍未返回全部候选：' : 'top-logprobs 截断：') + '\n- ' + missingOptions.join('\n- ') +
+          '\n未返回的候选不会被伪造为具体概率。' + (isGrammarMode ? '\n请把这段调试信息发给我；这通常表示 grammar/sampler 参数没有按预期进入原生生成接口。' : '')
+        : '\n\n✓ ' + letters.join('/') + ' 全部候选均在同一答题位置返回；当前分布可作为候选集合内的完整 JEV 概率分布。';
+      renderDebug(
+        ((data._localJevMeta && data._localJevMeta.mode === 'grammar') ? 'Local JEV Grammar 候选约束模式\n' : 'Local JEV 精确答题位模式\n') +
+        '答题 token 位置 #' + answerPos.idx + (usedFallback ? '（legacy fallback）' : '（实际生成 token 精确命中）') + '\n' +
+        '实际生成 token: ' + JSON.stringify(answerPos.selected) + '\n' +
+        '模型最终文本: ' + JSON.stringify(String(msgContent)) + '\n' +
+        'temperature=' + temperature + '\n' +
+        '模式=仅用户提供选项强制归一化（无 UNKNOWN / 无弃权）\n' +
+        ((data._localJevMeta && data._localJevMeta.mode === 'grammar') ?
+          'GBNF grammar=' + data._localJevMeta.grammar + '\n原生采样器: temperature=1, top_k=0, top_p=1, min_p=0, rep_pen=1\n' : '') + '\n' +
+        '该位置候选字母 logprobs（同字母变体已 logsumexp 合并）:\n' + JSON.stringify(letterLogprobs, null, 2) + '\n\n' +
+        '候选 logprobs:\n' + JSON.stringify(extracted, null, 2) + '\n\n' +
+        '校准后候选条件概率:\n' + JSON.stringify(probsObserved, null, 2) + truncationNote + '\n\n' + rawDebug,
+        letters
+      );
+      setStatus('live', '已连接');
+    }
+  }
+  // ============ Demo / simulate ============
+  function simulate() {
+    var options = state.options.map(function (o) { return o.trim(); }).filter(Boolean);
+    if (!options.length) {
+      renderError('请先添加至少一个选项。');
+      return;
+    }
+    startDecisionTimer();
+    showLoading();
+    setStatus('', '模拟中…');
+    setTimeout(function () {
+      // Random softmax-like distribution
+      var raw = options.map(function () { return Math.random() * 4 - 1; });
+      var maxR = Math.max.apply(null, raw);
+      var exps = raw.map(function (r) { return Math.exp(r - maxR); });
+      var sum = exps.reduce(function (a, b) { return a + b; }, 0);
+      var probs = {};
+      options.forEach(function (o, i) { probs[o] = exps[i] / sum; });
+      var winner = options[raw.indexOf(maxR)];
+      var confidence = probs[winner];
+      stopDecisionTimer();
+      renderResults({
+        value: winner,
+        probabilities: probs,
+        confidence: confidence,
+        abstained: false
+      });
+      setStatus('', '演示模式');
+    }, 600);
+  }
+  // ============ Wire up ============
+  runBtn.addEventListener('click', runDecision);
+  simulateBtn.addEventListener('click', simulate);
+  // Deploy mode: local vs cloud
+  var DEFAULTS = {
+    local: { url: 'http://localhost:5001/v1', model: 'koboldcpp/Qwen3.8-27B-GSQ-RCO-IQ3_XXS-Uncensored-MTP', keyPlaceholder: '本地模型可留空' },
+    cloud: { url: 'https://api.deepseek.com/', model: 'deepseek-v4-flash', keyPlaceholder: '请输入 API Key' }
+  };
+  document.querySelectorAll('#deploySeg .seg-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('#deploySeg .seg-btn').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      var mode = btn.getAttribute('data-mode');
+      var d = DEFAULTS[mode];
+      if (d) {
+        $('apiUrl').value = d.url;
+        $('model').value = d.model;
+        $('apiKey').placeholder = d.keyPlaceholder;
+      }
+    });
+  });
+  // Prefill example
+  $('reference').value = '我在凌晨 3 点收到一封来自陌生 IP 的登录告警邮件，提示账号在未授权设备上尝试登录。';
+  $('question').value = '将以下用户工单分类到正确的处理部门。';
+  renderOptions();
+  renderImagePreview();
+})();
+</script>
+</body>
+</html>
+

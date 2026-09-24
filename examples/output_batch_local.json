@@ -1,0 +1,189 @@
+[
+  {
+    "winner": "人工审核",
+    "confidence": 0.9374,
+    "probabilities_pct": {
+      "账单计费": 1.2,
+      "技术支持": 0.68,
+      "安全事件": 4.38,
+      "人工审核": 93.74
+    },
+    "elapsed_ms": 400.7,
+    "mode": "local",
+    "image_count": 0,
+    "answer_token_pos": 0,
+    "used_fallback": false,
+    "index": 0,
+    "id": "ticket-001"
+  },
+  {
+    "winner": "安全事件",
+    "confidence": 0.9651,
+    "probabilities_pct": {
+      "账单计费": 1.08,
+      "技术支持": 1.44,
+      "安全事件": 96.51,
+      "人工审核": 0.97
+    },
+    "elapsed_ms": 457.2,
+    "mode": "local",
+    "image_count": 0,
+    "answer_token_pos": 0,
+    "used_fallback": false,
+    "index": 1,
+    "id": "ticket-002"
+  },
+  {
+    "winner": "技术支持",
+    "confidence": 0.6168,
+    "probabilities_pct": {
+      "账单计费": 20.36,
+      "技术支持": 61.68,
+      "安全事件": 11.1,
+      "人工审核": 6.86
+    },
+    "elapsed_ms": 378.5,
+    "mode": "local",
+    "image_count": 0,
+    "answer_token_pos": 0,
+    "used_fallback": false,
+    "index": 2,
+    "id": "ticket-003"
+  },
+  {
+    "winner": "技术支持",
+    "confidence": 0.9393,
+    "probabilities_pct": {
+      "账单计费": 3.66,
+      "技术支持": 93.93,
+      "安全事件": 1.42,
+      "人工审核": 0.99
+    },
+    "elapsed_ms": 407.6,
+    "mode": "local",
+    "image_count": 0,
+    "answer_token_pos": 0,
+    "used_fallback": false,
+    "index": 3,
+    "id": "ticket-004"
+  },
+  {
+    "winner": "安全事件",
+    "confidence": 0.9687,
+    "probabilities_pct": {
+      "账单计费": 1.17,
+      "技术支持": 1.23,
+      "安全事件": 96.87,
+      "人工审核": 0.73
+    },
+    "elapsed_ms": 442.6,
+    "mode": "local",
+    "image_count": 0,
+    "answer_token_pos": 0,
+    "used_fallback": false,
+    "index": 4,
+    "id": "ticket-005"
+  },
+  {
+    "winner": "账单计费",
+    "confidence": 0.4812,
+    "probabilities_pct": {
+      "账单计费": 48.12,
+      "技术支持": 11.46,
+      "安全事件": 14.45,
+      "人工审核": 25.97
+    },
+    "elapsed_ms": 441.0,
+    "mode": "local",
+    "image_count": 0,
+    "answer_token_pos": 0,
+    "used_fallback": false,
+    "index": 5,
+    "id": "ticket-006"
+  },
+  {
+    "winner": "技术支持",
+    "confidence": 0.8354,
+    "probabilities_pct": {
+      "账单计费": 9.59,
+      "技术支持": 83.54,
+      "安全事件": 4.95,
+      "人工审核": 1.93
+    },
+    "elapsed_ms": 443.2,
+    "mode": "local",
+    "image_count": 0,
+    "answer_token_pos": 0,
+    "used_fallback": false,
+    "index": 6,
+    "id": "ticket-007"
+  },
+  {
+    "winner": "安全事件",
+    "confidence": 0.9381,
+    "probabilities_pct": {
+      "账单计费": 2.19,
+      "技术支持": 1.8,
+      "安全事件": 93.81,
+      "人工审核": 2.21
+    },
+    "elapsed_ms": 390.7,
+    "mode": "local",
+    "image_count": 0,
+    "answer_token_pos": 0,
+    "used_fallback": false,
+    "index": 7,
+    "id": "ticket-008"
+  },
+  {
+    "winner": "人工审核",
+    "confidence": 0.6216,
+    "probabilities_pct": {
+      "账单计费": 17.82,
+      "技术支持": 7.94,
+      "安全事件": 12.08,
+      "人工审核": 62.16
+    },
+    "elapsed_ms": 395.9,
+    "mode": "local",
+    "image_count": 0,
+    "answer_token_pos": 0,
+    "used_fallback": false,
+    "index": 8,
+    "id": "ticket-009"
+  },
+  {
+    "winner": "人工审核",
+    "confidence": 0.9289,
+    "probabilities_pct": {
+      "账单计费": 1.36,
+      "技术支持": 0.88,
+      "安全事件": 4.87,
+      "人工审核": 92.89
+    },
+    "elapsed_ms": 457.3,
+    "mode": "local",
+    "image_count": 0,
+    "answer_token_pos": 0,
+    "used_fallback": false,
+    "index": 9,
+    "id": "ticket-010"
+  },
+  {
+    "winner": "后端接口",
+    "confidence": 0.9708,
+    "probabilities_pct": {
+      "前端 UI": 1.93,
+      "后端接口": 97.08,
+      "数据报表": 0.62,
+      "权限配置": 0.36
+    },
+    "elapsed_ms": 446.4,
+    "mode": "local",
+    "image_count": 1,
+    "answer_token_pos": 0,
+    "used_fallback": false,
+    "index": 10,
+    "id": "ticket-011"
+  }
+]

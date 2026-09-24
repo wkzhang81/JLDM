@@ -1,0 +1,10 @@
+{
+  "mode": "local",
+  "base_url": "http://localhost:5001/v1",
+  "model": "koboldcpp/Qwen3.8-27B-GSQ-RCO-IQ3_XXS-Uncensored-MTP",
+  "api_key": "",
+  "temperature": 1.5,
+  "reference": "我在凌晨 3 点收到一封来自陌生 IP 的登录告警邮件，提示账号在未授权设备上尝试登录。",
+  "question": "将以下用户工单分类到正确的处理部门。",
+  "options": ["账单计费", "技术支持", "安全事件", "人工审核"]
+}
