@@ -4,6 +4,7 @@
 基于 [KoboldCpp](https://github.com/LostRuins/koboldcpp) 本地推理后端的 **Choice\<T\> 概率决策工具**。
 输入一段上下文、**一张图片**、一个评估准则和若干候选选项，模型通过 GBNF Grammar 被严格约束为只输出 A/B/C… 字母，随后从该答题 token 的 logprobs 中提取各候选的对数概率，经温度校准后输出完整的后验概率分布。
 常规决策速度介于300 ~ 600 ms。
+本地部署使用KoboldCpp，搭配qwen3.8-27B-GSQ-RCO-MTP和mmproj(图片识别，可不加载)，**16 GB显存即可流畅运行**。
 
 同时提供：
 - **Python CLI**（`jev_decision.py`）：支持批量 JSON 输入、无第三方依赖；
@@ -48,7 +49,7 @@
 
 ### 2. 下载模型文件
 
-本项目默认配合以下 GGUF 量化模型使用（27B 量级，IQ3_XXS 量化 + MTP，支持视觉）：
+本项目默认配合以下 GGUF 量化模型使用（27B 量级，IQ3_XXS 量化 + MTP，支持视觉，**~13 GB显存**）：
 
 | 文件 | 用途 | 下载地址 |
 |------|------|----------|
