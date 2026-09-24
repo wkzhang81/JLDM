@@ -1,4 +1,4 @@
-# Jev-like Decision Studio
+# Jev-like Decision Machine (JLDM)
 
 基于 [KoboldCpp](https://github.com/LostRuins/koboldcpp) 本地推理后端的 **Choice\<T\> 概率决策工具**。输入一段上下文、一个评估准则和若干候选选项，模型通过 GBNF Grammar 被严格约束为只输出 A/B/C… 字母，随后从该答题 token 的 logprobs 中提取各候选的对数概率，经温度校准后输出完整的后验概率分布。
 
