@@ -1,7 +1,9 @@
-# 支持多模态的类Jev决策机
+# 支持多模态的快速类Jev决策机
 ## Jev-like Decision Machine (JLDM) with image support
 
-基于 [KoboldCpp](https://github.com/LostRuins/koboldcpp) 本地推理后端的 **Choice\<T\> 概率决策工具**。输入一段上下文、**一张图片**、一个评估准则和若干候选选项，模型通过 GBNF Grammar 被严格约束为只输出 A/B/C… 字母，随后从该答题 token 的 logprobs 中提取各候选的对数概率，经温度校准后输出完整的后验概率分布。
+基于 [KoboldCpp](https://github.com/LostRuins/koboldcpp) 本地推理后端的 **Choice\<T\> 概率决策工具**。
+输入一段上下文、**一张图片**、一个评估准则和若干候选选项，模型通过 GBNF Grammar 被严格约束为只输出 A/B/C… 字母，随后从该答题 token 的 logprobs 中提取各候选的对数概率，经温度校准后输出完整的后验概率分布。
+常规决策速度介于300 ~ 600 ms。
 
 同时提供：
 - **Python CLI**（`jev_decision.py`）：支持批量 JSON 输入、无第三方依赖；
